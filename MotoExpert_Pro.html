@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MotoExpert — Sistem Pakar Diagnosa Kerusakan Motor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:    #0c1a2e;
+  --navy2:   #122038;
+  --navy3:   #1a2d4a;
+  --red:     #d9272d;
+  --red2:    #ff4a4f;
+  --red3:    #fff0f0;
+  --red4:    #ffd5d6;
+  --amber:   #d97706;
+  --amber2:  #fef3c7;
+  --green:   #059669;
+  --green2:  #d1fae5;
+  --danger:  #dc2626;
+  --danger2: #fee2e2;
+  --blue:    #1d4ed8;
+  --blue2:   #dbeafe;
+  --slate:   #334155;
+  --slate2:  #64748b;
+  --slate3:  #94a3b8;
+  --bg:      #f8fafc;
+  --white:   #ffffff;
+  --border:  #e2e8f0;
+  --border2: #cbd5e1;
+  --shadow:  0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.08);
+  --shadow2: 0 2px 8px rgba(0,0,0,.04), 0 12px 40px rgba(0,0,0,.10);
+  --radius:  12px;
+  --mono:    'JetBrains Mono', monospace;
+  --sans:    'Inter', sans-serif;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--sans);background:var(--bg);color:var(--slate);min-height:100vh;line-height:1.6;}
+
+/* ── NAVBAR ── */
+.navbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(12,26,46,0.97);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  padding:0 40px;height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.nav-logo{display:flex;align-items:center;gap:12px;text-decoration:none;}
+.nav-icon{
+  width:36px;height:36px;background:var(--red);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+}
+.nav-title{color:#fff;font-size:16px;font-weight:700;letter-spacing:-0.3px;}
+.nav-sub{color:rgba(255,255,255,0.3);font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;display:block;margin-top:1px;}
+.nav-pills{display:flex;align-items:center;gap:8px;}
+.pill{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.5px;padding:4px 10px;border-radius:20px;}
+.pill-red{background:rgba(217,39,45,0.18);color:#ff7075;border:1px solid rgba(217,39,45,0.25);}
+.pill-dim{background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.35);border:1px solid rgba(255,255,255,0.08);}
+.nav-cta{
+  background:var(--red);color:#fff;border:none;border-radius:8px;padding:8px 18px;
+  font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;
+}
+.nav-cta:hover{background:var(--red2);}
+
+/* ── HERO ── */
+.hero{
+  background:var(--navy);padding:80px 40px 72px;
+  position:relative;overflow:hidden;
+}
+.hero-glow{
+  position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 60% at 75% 50%,rgba(217,39,45,.09) 0%,transparent 65%),
+             radial-gradient(ellipse 40% 80% at 15% 85%,rgba(29,78,216,.06) 0%,transparent 55%);
+}
+.hero-grid-lines{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.022) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,0.022) 1px,transparent 1px);
+  background-size:52px 52px;
+  mask-image:radial-gradient(ellipse 80% 100% at 50% 0%,black 0%,transparent 100%);
+}
+.hero-inner{max-width:900px;margin:0 auto;position:relative;display:flex;align-items:center;justify-content:space-between;gap:40px;}
+.hero-left{flex:1;}
+.hero-right{flex-shrink:0;font-size:160px;line-height:1;opacity:0.07;user-select:none;filter:grayscale(1);}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(217,39,45,0.12);border:1px solid rgba(217,39,45,0.25);
+  border-radius:20px;padding:5px 14px;margin-bottom:28px;
+}
+.hero-badge-dot{width:6px;height:6px;background:var(--red2);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.hero-badge-txt{font-family:var(--mono);font-size:10px;font-weight:500;color:var(--red2);letter-spacing:1px;text-transform:uppercase;}
+.hero h1{
+  font-size:clamp(30px,4.5vw,54px);font-weight:800;
+  color:#fff;line-height:1.1;letter-spacing:-1.5px;margin-bottom:20px;
+}
+.hero h1 em{color:var(--red2);font-style:normal;}
+.hero-desc{color:rgba(255,255,255,0.45);font-size:15px;line-height:1.75;max-width:520px;margin-bottom:44px;}
+.hero-stats{display:flex;gap:0;flex-wrap:wrap;margin-bottom:44px;border:1px solid rgba(255,255,255,0.06);border-radius:10px;overflow:hidden;display:inline-flex;}
+.hstat{padding:18px 26px;border-right:1px solid rgba(255,255,255,0.06);}
+.hstat:last-child{border-right:none;}
+.hstat-num{color:#fff;font-size:26px;font-weight:800;font-family:var(--mono);letter-spacing:-1px;}
+.hstat-label{color:rgba(255,255,255,0.28);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.hero-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.btn-primary{
+  background:var(--red);color:#fff;border:none;border-radius:10px;padding:14px 30px;
+  font-family:var(--sans);font-size:15px;font-weight:700;cursor:pointer;transition:all .15s;
+}
+.btn-primary:hover{background:var(--red2);transform:translateY(-1px);}
+.btn-ghost{
+  background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.65);
+  border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:13px 24px;
+  font-family:var(--sans);font-size:14px;font-weight:500;cursor:pointer;transition:all .15s;
+}
+.btn-ghost:hover{background:rgba(255,255,255,0.1);color:#fff;}
+
+/* ── FEATURES STRIP ── */
+.features-strip{
+  background:#fff;border-bottom:1px solid var(--border);
+  padding:18px 40px;display:flex;align-items:center;justify-content:center;gap:36px;flex-wrap:wrap;
+}
+.feat-item{display:flex;align-items:center;gap:8px;color:var(--slate2);font-size:13px;font-weight:500;}
+.feat-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.feat-red{background:var(--red3);}
+.feat-blue{background:var(--blue2);}
+.feat-green{background:var(--green2);}
+.feat-amber{background:var(--amber2);}
+.feat-sep{width:1px;height:22px;background:var(--border);flex-shrink:0;}
+
+/* ── MAIN ── */
+.main{max-width:880px;margin:0 auto;padding:48px 20px 80px;}
+
+/* ── INTRO ── */
+.intro-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;}
+.intro-main{
+  background:#fff;border:1px solid var(--border);border-radius:var(--radius);
+  padding:36px;box-shadow:var(--shadow);grid-column:1/3;
+}
+.mini-card{
+  background:#fff;border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px 22px;box-shadow:var(--shadow);
+}
+.mini-card-icon{font-size:26px;margin-bottom:8px;}
+.mini-card-title{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:4px;}
+.mini-card-desc{font-size:12px;color:var(--slate2);line-height:1.55;}
+
+.intro-head{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
+.intro-logo{
+  width:52px;height:52px;background:var(--red);border-radius:12px;
+  display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;
+  box-shadow:0 4px 16px rgba(217,39,45,0.3);
+}
+.intro-main h2{font-size:22px;font-weight:800;color:var(--navy);letter-spacing:-0.5px;margin-bottom:2px;}
+.intro-sub{font-size:11px;color:var(--slate3);font-family:var(--mono);}
+.intro-desc{color:var(--slate2);font-size:14px;line-height:1.75;margin-bottom:22px;}
+.intro-tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;}
+.tag{font-family:var(--mono);font-size:11px;font-weight:500;padding:5px 12px;border-radius:6px;}
+.tag-r{background:var(--red3);color:var(--red);border:1px solid var(--red4);}
+.tag-b{background:var(--blue2);color:var(--blue);border:1px solid #bfdbfe;}
+.tag-g{background:var(--green2);color:var(--green);border:1px solid #a7f3d0;}
+.tag-a{background:var(--amber2);color:var(--amber);border:1px solid #fde68a;}
+
+/* ── PROGRESS ── */
+.progress-card{
+  background:#fff;border:1px solid var(--border);border-radius:var(--radius);
+  padding:18px 24px;margin-bottom:20px;box-shadow:var(--shadow);
+}
+.prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.prog-label{font-size:12px;font-weight:600;color:var(--slate2);text-transform:uppercase;letter-spacing:.8px;}
+.prog-frac{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--red);}
+.prog-track{height:6px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:8px;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--red2));border-radius:99px;transition:width .4s cubic-bezier(.4,0,.2,1);}
+.prog-steps{display:flex;gap:3px;}
+.prog-step{height:3px;flex:1;border-radius:99px;background:var(--border);transition:background .3s;}
+.prog-step.done{background:var(--red);}
+.prog-step.active{background:var(--red2);}
+
+/* ── QUESTION ── */
+.q-card{
+  background:#fff;border:1px solid var(--border);border-radius:var(--radius);
+  padding:32px 36px;box-shadow:var(--shadow2);
+  animation:fadeUp .3s cubic-bezier(.4,0,.2,1);
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.q-header{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+.q-cat{
+  font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;
+  background:var(--red3);color:var(--red);border:1px solid var(--red4);padding:3px 10px;border-radius:4px;
+}
+.q-num{font-family:var(--mono);font-size:11px;color:var(--slate3);}
+.q-text{font-size:17px;font-weight:700;color:var(--navy);line-height:1.45;margin-bottom:22px;letter-spacing:-0.3px;}
+
+/* ── OPTIONS ── */
+.opts{display:flex;flex-direction:column;gap:8px;}
+.opt{
+  display:flex;align-items:center;gap:14px;
+  background:var(--bg);border:1.5px solid var(--border);
+  border-radius:10px;padding:14px 16px;cursor:pointer;
+  transition:all .15s;text-align:left;width:100%;
+}
+.opt:hover{border-color:var(--red);background:var(--red3);transform:translateX(2px);}
+.opt.sel{border-color:var(--red);background:var(--red3);box-shadow:0 0 0 3px rgba(217,39,45,0.1);}
+.opt-radio{
+  width:18px;height:18px;min-width:18px;border:2px solid var(--border2);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .15s;
+}
+.opt:hover .opt-radio,.opt.sel .opt-radio{border-color:var(--red);background:var(--red);}
+.opt.sel .opt-radio::after{content:'';width:6px;height:6px;background:#fff;border-radius:50%;}
+.opt-label{font-size:14px;font-weight:500;color:var(--slate);flex:1;}
+.opt-cf{font-family:var(--mono);font-size:10px;color:var(--slate3);font-weight:600;background:var(--bg);padding:2px 7px;border-radius:4px;border:1px solid var(--border);margin-left:auto;}
+.opt.sel .opt-cf{background:rgba(217,39,45,0.08);border-color:rgba(217,39,45,0.2);color:var(--red);}
+
+/* ── SCALE ── */
+.scale-wrap{display:flex;gap:8px;}
+.scale-btn{
+  flex:1;background:var(--bg);border:1.5px solid var(--border);
+  border-radius:10px;padding:14px 6px 12px;cursor:pointer;text-align:center;transition:all .15s;
+}
+.scale-btn:hover{border-color:var(--red);background:var(--red3);}
+.scale-btn.sel{border-color:var(--red);background:var(--red3);box-shadow:0 0 0 3px rgba(217,39,45,0.1);}
+.scale-n{font-size:20px;font-weight:800;font-family:var(--mono);color:var(--navy);}
+.scale-t{font-size:10px;color:var(--slate2);margin-top:4px;line-height:1.3;font-weight:500;}
+.scale-btn.sel .scale-n,.scale-btn.sel .scale-t{color:var(--red);}
+.scale-labels{display:flex;justify-content:space-between;margin-top:6px;padding:0 4px;}
+.scale-label-txt{font-size:10px;color:var(--slate3);font-weight:500;}
+
+/* ── NAV BUTTONS ── */
+.q-nav{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:28px;padding-top:22px;border-top:1px solid var(--border);
+}
+.btn-back{
+  background:none;border:1.5px solid var(--border2);border-radius:8px;padding:10px 18px;
+  font-family:var(--sans);font-size:13px;font-weight:600;color:var(--slate2);
+  cursor:pointer;transition:all .15s;
+}
+.btn-back:hover{border-color:var(--slate);color:var(--slate);}
+.btn-next{
+  background:var(--red);color:#fff;border:none;border-radius:8px;padding:11px 28px;
+  font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;
+  opacity:.3;pointer-events:none;
+}
+.btn-next.on{opacity:1;pointer-events:all;}
+.btn-next.on:hover{background:var(--red2);transform:translateY(-1px);}
+
+/* ── RESULT ── */
+.res-card{
+  background:#fff;border:1px solid var(--border);border-radius:var(--radius);
+  overflow:hidden;box-shadow:var(--shadow2);animation:fadeUp .4s ease;
+}
+.res-head{
+  background:var(--navy);padding:36px;border-bottom:3px solid var(--red);
+  position:relative;overflow:hidden;
+}
+.res-head::after{
+  content:'';position:absolute;right:-60px;top:-60px;width:200px;height:200px;
+  border-radius:50%;background:radial-gradient(circle,rgba(217,39,45,.12) 0%,transparent 70%);
+  pointer-events:none;
+}
+.res-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;
+  padding:5px 12px;border-radius:4px;margin-bottom:16px;
+}
+.rb-kritis{background:rgba(220,38,38,.2);color:#ff7070;border:1px solid rgba(220,38,38,.3);}
+.rb-sedang{background:rgba(217,119,6,.2);color:#ffc040;border:1px solid rgba(217,119,6,.3);}
+.rb-ringan{background:rgba(5,150,105,.2);color:#50e0a0;border:1px solid rgba(5,150,105,.3);}
+.res-head h2{color:#fff;font-size:24px;font-weight:800;letter-spacing:-0.5px;margin-bottom:8px;}
+.res-meta{color:rgba(255,255,255,0.4);font-size:13px;display:flex;gap:16px;flex-wrap:wrap;}
+
+.res-body{padding:32px 36px;}
+
+/* ── CF METER ── */
+.cf-meter{
+  margin-bottom:30px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:20px 22px;
+}
+.cf-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.cf-label{font-size:13px;font-weight:600;color:var(--slate);}
+.cf-pct{font-family:var(--mono);font-size:20px;font-weight:800;color:var(--red);}
+.cf-track{height:12px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:8px;}
+.cf-bar{height:100%;border-radius:99px;transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+.cf-desc{font-size:12px;font-weight:600;font-family:var(--mono);}
+.cf-sublabel{font-size:11px;color:var(--slate3);margin-top:4px;}
+
+/* ── SECTION TITLE ── */
+.sec{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--slate3);margin:28px 0 12px;display:flex;align-items:center;gap:8px;}
+.sec::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* ── RANK LIST ── */
+.diag-list{display:flex;flex-direction:column;gap:8px;}
+.diag-item{
+  display:flex;align-items:center;gap:14px;
+  border:1px solid var(--border);border-radius:10px;padding:13px 16px;background:var(--bg);
+}
+.diag-item.top{background:#fff;border-color:var(--red);box-shadow:0 0 0 2px rgba(217,39,45,0.08);}
+.diag-rank{width:32px;height:32px;min-width:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;font-family:var(--mono);flex-shrink:0;}
+.dr1{background:var(--red);}
+.dr2{background:var(--amber);}
+.dr3{background:var(--slate3);}
+.drn{background:var(--border2);}
+.diag-icon{font-size:18px;}
+.diag-info{flex:1;}
+.diag-name{font-size:14px;font-weight:700;color:var(--navy);}
+.diag-sub{font-size:11px;color:var(--slate3);margin-top:2px;font-family:var(--mono);}
+.diag-bar-wrap{width:80px;}
+.diag-bar-track{height:4px;background:var(--border);border-radius:99px;margin-bottom:4px;}
+.diag-bar-fill{height:100%;border-radius:99px;}
+.diag-pct{font-family:var(--mono);font-size:12px;font-weight:700;text-align:right;}
+
+/* ── ACTIONS ── */
+.action-box{background:var(--red3);border:1px solid var(--red4);border-radius:10px;padding:20px 22px;}
+.action-box-head{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.action-box-head h4{font-size:13px;font-weight:700;color:var(--red);}
+.action-item{display:flex;gap:12px;align-items:flex-start;font-size:13px;line-height:1.65;margin-bottom:8px;color:var(--slate);}
+.action-item:last-child{margin-bottom:0;}
+.action-num{font-family:var(--mono);font-size:10px;font-weight:700;background:var(--red);color:#fff;min-width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;margin-top:2px;flex-shrink:0;}
+
+/* ── SCHEDULE ── */
+.sched-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;}
+.sched-item{border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;}
+.sched-item-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;font-family:var(--mono);}
+.sched-item-val{font-size:13px;font-weight:600;}
+.si-red{background:var(--danger2);border:1px solid #fca5a5;}
+.si-red .sched-item-label,.si-red .sched-item-val{color:var(--danger);}
+.si-green{background:var(--green2);border:1px solid #6ee7b7;}
+.si-green .sched-item-label,.si-green .sched-item-val{color:var(--green);}
+.si-amber{background:var(--amber2);border:1px solid #fde68a;}
+.si-amber .sched-item-label,.si-amber .sched-item-val{color:var(--amber);}
+.si-blue{background:var(--blue2);border:1px solid #93c5fd;}
+.si-blue .sched-item-label,.si-blue .sched-item-val{color:var(--blue);}
+
+/* ── PARTS NEEDED ── */
+.parts-box{
+  background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:18px 20px;
+}
+.parts-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.part-chip{
+  background:#fff;border:1px solid var(--border2);border-radius:6px;
+  padding:6px 12px;font-size:12px;font-weight:500;color:var(--slate);
+  display:flex;align-items:center;gap:6px;
+}
+.part-chip span{font-size:14px;}
+
+/* ── LOG ── */
+.log-wrap{margin-top:24px;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.log-head{
+  background:var(--navy);padding:12px 20px;
+  display:flex;justify-content:space-between;align-items:center;cursor:pointer;
+}
+.log-head-left{display:flex;align-items:center;gap:8px;}
+.log-head-dot{width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0;}
+.log-head-title{font-family:var(--mono);font-size:11px;font-weight:600;color:rgba(255,255,255,0.5);letter-spacing:.5px;}
+.log-tog{font-family:var(--mono);font-size:10px;color:var(--red2);font-weight:600;letter-spacing:.5px;}
+.log-body{
+  display:none;padding:16px 18px;background:#0a1628;
+  max-height:260px;overflow-y:auto;
+  font-family:var(--mono);font-size:11px;line-height:2;color:rgba(255,255,255,0.35);
+}
+.log-body.open{display:block;}
+.log-body::-webkit-scrollbar{width:4px;}
+.log-body::-webkit-scrollbar-thumb{background:var(--red);border-radius:99px;}
+.lg-ok{color:#ff7075;}
+.lg-skip{color:rgba(255,255,255,0.18);}
+.lg-head{color:#fde68a;font-weight:600;}
+.lg-cf{color:#5de0a8;}
+
+/* ── RESET ── */
+.btn-reset{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;background:var(--navy);color:#fff;border:none;border-radius:10px;padding:15px;
+  font-family:var(--sans);font-size:15px;font-weight:700;cursor:pointer;margin-top:24px;transition:background .15s;
+}
+.btn-reset:hover{background:var(--navy2);}
+
+/* ── FOOTER ── */
+footer{background:var(--navy);border-top:1px solid rgba(255,255,255,0.05);padding:32px 40px;}
+.footer-inner{max-width:880px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+.footer-left{display:flex;align-items:center;gap:10px;}
+.footer-logo-icon{width:28px;height:28px;background:var(--red);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.footer-brand{color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;}
+.footer-ver{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:4px;}
+.footer-right{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.25);text-align:right;}
+
+@media(max-width:640px){
+  .navbar{padding:0 16px;}
+  .hero{padding:48px 16px 36px;}
+  .hero-right{display:none;}
+  .hero-inner{flex-direction:column;}
+  .hero-stats{flex-wrap:wrap;}
+  .hstat{padding:12px 16px;}
+  .features-strip{padding:14px 16px;gap:16px;}
+  .feat-sep{display:none;}
+  .pill{display:none;}
+  .intro-grid{grid-template-columns:1fr;}
+  .intro-main{grid-column:1;}
+  .q-card{padding:22px 18px;}
+  .res-head{padding:24px 20px;}
+  .res-body{padding:22px 18px;}
+  .scale-wrap{gap:4px;}
+  .scale-n{font-size:16px;}
+  footer{padding:24px 16px;}
+  .footer-inner{flex-direction:column;align-items:flex-start;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a class="nav-logo" href="#">
+    <div class="nav-icon">🏍️</div>
+    <div>
+      <div class="nav-title">MotoExpert</div>
+      <span class="nav-sub">Motor Diagnostic System v1.0</span>
+    </div>
+  </a>
+  <div class="nav-pills">
+    <div class="pill pill-red">Forward Chaining</div>
+    <div class="pill pill-dim">Certainty Factor</div>
+  </div>
+  <button class="nav-cta" onclick="document.getElementById('main-app').scrollIntoView({behavior:'smooth'})">
+    ▶ Mulai Diagnosa
+  </button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-grid-lines"></div>
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-badge">
+        <div class="hero-badge-dot"></div>
+        <div class="hero-badge-txt">Sistem Pakar · Otomotif &amp; Kendaraan</div>
+      </div>
+      <h1>Diagnosa Kerusakan<br><em>Motor</em></h1>
+      <p class="hero-desc">Ceritakan gejala yang dialami motor Anda. Sistem akan menganalisis menggunakan 24 aturan Forward Chaining dan Certainty Factor untuk menemukan penyebab kerusakan dan langkah perbaikan yang tepat.</p>
+      <div class="hero-stats">
+        <div class="hstat"><div class="hstat-num">24</div><div class="hstat-label">Aturan IF-THEN</div></div>
+        <div class="hstat"><div class="hstat-num">9</div><div class="hstat-label">Jenis Kerusakan</div></div>
+        <div class="hstat"><div class="hstat-num">15</div><div class="hstat-label">Gejala</div></div>
+        <div class="hstat"><div class="hstat-num">CF</div><div class="hstat-label">Akurasi</div></div>
+      </div>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="document.getElementById('main-app').scrollIntoView({behavior:'smooth'})">🔬 Diagnosa Sekarang</button>
+        <button class="btn-ghost" onclick="document.getElementById('main-app').scrollIntoView({behavior:'smooth'})">Cara Kerja ↓</button>
+      </div>
+    </div>
+    <div class="hero-right">🏍️</div>
+  </div>
+</section>
+
+<!-- FEATURES STRIP -->
+<div class="features-strip">
+  <div class="feat-item"><div class="feat-icon feat-red">🔥</div>Sistem Pembakaran</div>
+  <div class="feat-sep"></div>
+  <div class="feat-item"><div class="feat-icon feat-blue">⚡</div>Kelistrikan &amp; Aki</div>
+  <div class="feat-sep"></div>
+  <div class="feat-item"><div class="feat-icon feat-green">🔧</div>Mesin &amp; Transmisi</div>
+  <div class="feat-sep"></div>
+  <div class="feat-item"><div class="feat-icon feat-amber">⚙️</div>Rem &amp; Suspensi</div>
+  <div class="feat-sep"></div>
+  <div class="feat-item"><div class="feat-icon feat-red">⛽</div>Bahan Bakar &amp; Karburator</div>
+</div>
+
+<!-- MAIN APP -->
+<div class="main" id="main-app">
+
+  <!-- INTRO -->
+  <div id="sc-intro">
+    <div class="intro-grid">
+      <div class="intro-main">
+        <div class="intro-head">
+          <div class="intro-logo">🏍️</div>
+          <div>
+            <h2>Diagnosa Motor Anda Sekarang</h2>
+            <div class="intro-sub">// MotoExpert · Forward Chaining Inference Engine</div>
+          </div>
+        </div>
+        <p class="intro-desc">Jawab 15 pertanyaan tentang gejala yang muncul pada motor Anda. Sistem pakar akan menganalisis menggunakan algoritma Forward Chaining dengan metode Certainty Factor, lalu memberikan diagnosa kerusakan lengkap beserta rekomendasi perbaikan dan estimasi komponen yang perlu diganti.</p>
+        <div class="intro-tags">
+          <div class="tag tag-r">🔥 Pembakaran</div>
+          <div class="tag tag-b">⚡ Kelistrikan</div>
+          <div class="tag tag-g">🔧 Mekanik</div>
+          <div class="tag tag-a">⛽ Bahan Bakar</div>
+        </div>
+        <button class="btn-primary" style="font-size:15px;padding:14px 36px;" onclick="mulai()">Mulai Diagnosa →</button>
+      </div>
+      <div class="mini-card">
+        <div class="mini-card-icon">🔥</div>
+        <div class="mini-card-title">Sistem Pembakaran</div>
+        <div class="mini-card-desc">Deteksi masalah busi, kompresi mesin, dan sistem pengapian yang tidak optimal.</div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-card-icon">⚡</div>
+        <div class="mini-card-title">Kelistrikan &amp; Aki</div>
+        <div class="mini-card-desc">Diagnosa aki lemah, kiprok rusak, dan gangguan sistem pengisian daya.</div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-card-icon">⛽</div>
+        <div class="mini-card-title">Bahan Bakar</div>
+        <div class="mini-card-desc">Analisis karburator tersumbat, injektor kotor, dan masalah suplai BBM.</div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-card-icon">🔧</div>
+        <div class="mini-card-title">Mesin &amp; Transmisi</div>
+        <div class="mini-card-desc">Deteksi keausan rantai, kopling selip, kebocoran oli, dan overheat mesin.</div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-card-icon">⚙️</div>
+        <div class="mini-card-title">Rem &amp; Suspensi</div>
+        <div class="mini-card-desc">Evaluasi kampas rem habis, suspensi bocor, dan masalah pengereman.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUESTION -->
+  <div id="sc-question" style="display:none">
+    <div class="progress-card">
+      <div class="prog-top">
+        <div class="prog-label">Progres Diagnosa</div>
+        <div class="prog-frac" id="prog-txt">0 / 15</div>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="prog-steps" id="prog-steps"></div>
+    </div>
+    <div class="q-card" id="q-card">
+      <div class="q-header">
+        <div class="q-cat" id="q-tag"></div>
+        <div class="q-num" id="q-num"></div>
+      </div>
+      <div class="q-text" id="q-text"></div>
+      <div id="q-opts"></div>
+      <div class="q-nav">
+        <button class="btn-back" id="btn-back" onclick="prev()">← Kembali</button>
+        <button class="btn-next" id="btn-next" onclick="next()">Lanjut →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="sc-result" style="display:none"></div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <div class="footer-logo-icon">🏍️</div>
+      <div>
+        <div class="footer-brand">MotoExpert</div>
+        <div style="color:rgba(255,255,255,0.3);font-size:11px;margin-top:1px;font-family:var(--mono)">Sistem Pakar Diagnosa Kerusakan Motor</div>
+      </div>
+      <div class="footer-ver">v1.0</div>
+    </div>
+    <div class="footer-right">
+      UAS Sistem Pakar 2025/2026<br>
+      Forward Chaining · Certainty Factor
+    </div>
+  </div>
+</footer>
+
+<script>
+// ══════════════════════════════════════════
+// KNOWLEDGE BASE — MOTOR
+// ══════════════════════════════════════════
+const KERUSAKAN = {
+  BUS: {
+    nama: "Busi Bermasalah / Pengapian Lemah",
+    icon: "⚡",
+    cat: "Sistem Pengapian",
+    level: "SEDANG",
+    jadwal: "1–3 hari",
+    parts: ["🔩 Busi baru","🔌 Kabel busi","📦 CDI (jika perlu)"],
+    aksi: [
+      "Lepas dan periksa kondisi busi — ganti jika elektroda aus atau berkerak hitam",
+      "Bersihkan kepala busi dengan amplas halus jika masih bisa dipakai",
+      "Periksa celah elektroda busi dan sesuaikan (standar 0.6–0.8mm)",
+      "Cek kabel busi dari kebocoran arus atau keretakan isolasi",
+      "Jika masalah berlanjut, periksa modul CDI / koil pengapian"
+    ]
+  },
+  AKI: {
+    nama: "Aki Lemah / Sistem Kelistrikan",
+    icon: "🔋",
+    cat: "Kelistrikan",
+    level: "SEDANG",
+    jadwal: "1–3 hari",
+    parts: ["🔋 Aki baru","⚡ Kiprok/Regulator","🔌 Sekring"],
+    aksi: [
+      "Ukur tegangan aki — normalnya 12.4–12.7V (diam) / 13.7–14.5V (mesin hidup)",
+      "Periksa kondisi terminal aki dari korosi dan kencangkan kembali",
+      "Tes kiprok/regulator — jika tegangan pengisian >15V, kiprok rusak",
+      "Cek semua sekring dari yang putus dan ganti sesuai ampernya",
+      "Jika aki sudah >2 tahun dan drop, segera ganti aki baru"
+    ]
+  },
+  BBM: {
+    nama: "Masalah Bahan Bakar / Karburator",
+    icon: "⛽",
+    cat: "Sistem Bahan Bakar",
+    level: "SEDANG",
+    jadwal: "1–3 hari",
+    parts: ["🧹 Kit servis karburator","🔧 Spuyer / jet","⛽ Filter bensin"],
+    aksi: [
+      "Bersihkan karburator secara menyeluruh — semprot semua saluran dengan karburator cleaner",
+      "Periksa dan bersihkan filter bensin — ganti jika sudah kotor parah",
+      "Cek kondisi pelampung karburator dari keretakan",
+      "Setel ulang angin karburator sesuai spesifikasi pabrik",
+      "Untuk motor injeksi: bersihkan injektor dengan cairan pembersih injeksi"
+    ]
+  },
+  OVH: {
+    nama: "Mesin Overheat (Panas Berlebih)",
+    icon: "🌡️",
+    cat: "Termal Mesin",
+    level: "KRITIS",
+    jadwal: "Segera (dalam 24 jam)",
+    parts: ["🛢️ Oli mesin baru","❄️ Cairan pendingin","🔧 Thermostat"],
+    aksi: [
+      "Segera matikan mesin dan biarkan dingin minimal 30 menit — jangan paksa jalan",
+      "Periksa level oli mesin — tambah atau ganti oli jika kurang/kotor",
+      "Untuk motor berpendingin air: cek level coolant dan kondisi radiator",
+      "Bersihkan sirip pendingin mesin dari debu dan kotoran yang menghambat udara",
+      "Hindari operasi mesin pada putaran tinggi berkepanjangan di cuaca panas"
+    ]
+  },
+  OLI: {
+    nama: "Kebocoran Oli / Pelumasan Buruk",
+    icon: "🛢️",
+    cat: "Sistem Pelumasan",
+    level: "KRITIS",
+    jadwal: "Segera (dalam 48 jam)",
+    parts: ["🛢️ Oli mesin","🔩 Seal/gasket baru","🔧 O-ring"],
+    aksi: [
+      "Identifikasi sumber kebocoran — crankshaft seal, head gasket, atau drain bolt",
+      "Ganti seal atau gasket yang bocor dengan suku cadang asli",
+      "Ganti oli mesin setelah perbaikan kebocoran selesai",
+      "Pastikan level oli selalu di antara batas min-max sebelum berkendara",
+      "Cek interval ganti oli — jangan melebihi 2000–4000 km sesuai rekomendasi pabrikan"
+    ]
+  },
+  RAN: {
+    nama: "Rantai / Gir Aus",
+    icon: "⚙️",
+    cat: "Sistem Transmisi",
+    level: "SEDANG",
+    jadwal: "3–7 hari",
+    parts: ["⛓️ Rantai motor baru","⚙️ Sproket/gir depan-belakang","🛢️ Oli rantai"],
+    aksi: [
+      "Periksa kekencangan rantai — jarak main sekitar 20–30mm (sesuai manual)",
+      "Lumasi rantai dengan oli khusus rantai secara merata",
+      "Periksa gigi sproket dari keausan berlebih — ganti jika sudah runcing",
+      "Jika rantai sudah molor atau ada mata yang kaku, ganti satu set (rantai + sproket)",
+      "Bersihkan rantai dengan sikat dan bensin secara berkala"
+    ]
+  },
+  KOP: {
+    nama: "Kopling Selip / Bermasalah",
+    icon: "🔄",
+    cat: "Sistem Kopling",
+    level: "SEDANG",
+    jadwal: "3–7 hari",
+    parts: ["🔄 Kampas kopling set","🔧 Per kopling","🛢️ Oli transmisi"],
+    aksi: [
+      "Setel ulang jarak main tuas kopling — normalnya 10–20mm di ujung tuas",
+      "Periksa kondisi kampas kopling dari keausan — ganti jika ketebalan < 2.5mm",
+      "Ganti oli transmisi yang sudah hitam atau encer",
+      "Cek per kopling dari yang lemah atau patah",
+      "Hindari kebiasaan setengah kopling berkepanjangan yang mempercepat keausan"
+    ]
+  },
+  REM: {
+    nama: "Rem Bermasalah / Kampas Habis",
+    icon: "🛑",
+    cat: "Sistem Pengereman",
+    level: "KRITIS",
+    jadwal: "Segera (dalam 24 jam)",
+    parts: ["🛑 Kampas rem baru","🔧 Cakram/tromol (jika perlu)","🛢️ Minyak rem"],
+    aksi: [
+      "Segera ganti kampas rem yang sudah habis — kondisi ini BERBAHAYA",
+      "Periksa ketebalan cakram / kondisi tromol dari keausan",
+      "Untuk rem hidrolik: cek dan ganti minyak rem setiap 2 tahun atau jika warna gelap",
+      "Setel ulang jarak main rem sesuai manual — terlalu renggang = bahaya",
+      "Bersihkan kaliper dari kotoran dan pastikan piston bergerak bebas"
+    ]
+  },
+  SUS: {
+    nama: "Suspensi Bocor / Aus",
+    icon: "🔗",
+    cat: "Suspensi & Kemudi",
+    level: "SEDANG",
+    jadwal: "3–7 hari",
+    parts: ["🔗 Seal suspensi","🛢️ Oli shockbreaker","🔩 Bearing kemudi"],
+    aksi: [
+      "Periksa shockbreaker depan/belakang dari kebocoran oli (bekas oli di tabung)",
+      "Ganti seal shockbreaker dan isi ulang oli suspensi sesuai spesifikasi",
+      "Cek bearing kemudi (setang) dari keausan — putar setang secara perlahan untuk cek",
+      "Untuk suspensi belakang monoshock: periksa linkage dan bushing dari keausan",
+      "Setel preload suspensi sesuai berat pengendara dan muatan"
+    ]
+  },
+};
+
+// ── 15 Pertanyaan Diagnosa Motor ──
+const QS = [
+  // PEMBAKARAN
+  { cat:"Sistem Pembakaran", g:"susah_start", type:"choice",
+    text:"Apakah motor sulit atau tidak mau menyala saat distarter (baik kick maupun electric starter)?",
+    opts:[{t:"Ya, sangat sulit bahkan tidak mau hidup sama sekali",cf:0.92},{t:"Agak susah, perlu beberapa kali starter",cf:0.60},{t:"Tidak, starter normal seperti biasa",cf:0.05}] },
+  { cat:"Sistem Pembakaran", g:"mesin_mati_sendiri", type:"choice",
+    text:"Apakah mesin tiba-tiba mati sendiri saat berkendara atau saat idle/stasioner?",
+    opts:[{t:"Ya, sering mati mendadak",cf:0.88},{t:"Kadang-kadang, tidak tentu",cf:0.55},{t:"Tidak pernah",cf:0.05}] },
+  // BAHAN BAKAR
+  { cat:"Bahan Bakar & Karburator", g:"boros_bbm", type:"choice",
+    text:"Apakah konsumsi bahan bakar motor terasa jauh lebih boros dari biasanya?",
+    opts:[{t:"Ya, jauh lebih boros dari sebelumnya",cf:0.85},{t:"Sedikit lebih boros, mungkin wajar",cf:0.45},{t:"Tidak, konsumsi BBM normal",cf:0.05}] },
+  { cat:"Bahan Bakar & Karburator", g:"asap_knalpot", type:"scale", text:"Seberapa banyak asap yang keluar dari knalpot saat mesin dinyalakan atau berakselerasi?" },
+  // KELISTRIKAN
+  { cat:"Kelistrikan & Aki", g:"aki_drop", type:"choice",
+    text:"Apakah electric starter terdengar lemah/lambat, atau lampu motor redup saat mesin mati?",
+    opts:[{t:"Ya, starter terasa lemah dan lampu redup",cf:0.90},{t:"Sedikit terasa, tidak terlalu parah",cf:0.55},{t:"Tidak, semua normal",cf:0.05}] },
+  { cat:"Kelistrikan & Aki", g:"lampu_bermasalah", type:"choice",
+    text:"Apakah ada lampu (depan/sein/belakang) yang mati atau berkedip tidak normal?",
+    opts:[{t:"Ya, ada lampu yang mati atau berkedip",cf:0.80},{t:"Sesekali, kadang normal kembali",cf:0.45},{t:"Tidak ada masalah lampu",cf:0.05}] },
+  // MESIN
+  { cat:"Kondisi Mesin", g:"suhu_mesin", type:"choice",
+    text:"Apakah mesin terasa sangat panas (overheat) bahkan setelah jarak tempuh yang tidak jauh?",
+    opts:[{t:"Ya, sangat panas dan ada bau terbakar",cf:0.92},{t:"Lebih panas dari biasanya",cf:0.60},{t:"Tidak, suhu mesin normal",cf:0.05}] },
+  { cat:"Kondisi Mesin", g:"suara_mesin", type:"scale", text:"Seberapa keras suara ketukan atau 'ngelitik' yang terdengar dari dalam mesin saat motor jalan?" },
+  // OLI
+  { cat:"Sistem Pelumasan", g:"oli_bocor", type:"choice",
+    text:"Apakah ada bekas tetesan atau rembesan oli di bawah motor atau di bagian mesin?",
+    opts:[{t:"Ya, ada kebocoran oli yang jelas",cf:0.90},{t:"Ada sedikit rembesan, tidak terlalu banyak",cf:0.55},{t:"Tidak ada kebocoran",cf:0.05}] },
+  { cat:"Sistem Pelumasan", g:"oli_kurang", type:"scale", text:"Bagaimana kondisi level dan warna oli mesin saat ini?" },
+  // TRANSMISI
+  { cat:"Rantai & Transmisi", g:"rantai_aus", type:"choice",
+    text:"Apakah terdengar suara berisik dari area rantai, atau rantai terasa kendor/kaku saat dikayuh?",
+    opts:[{t:"Ya, rantai berisik dan terasa bermasalah",cf:0.88},{t:"Sedikit berbunyi, mungkin perlu pelumasan",cf:0.50},{t:"Rantai normal dan tenang",cf:0.05}] },
+  { cat:"Rantai & Transmisi", g:"kopling_slip", type:"choice",
+    text:"Apakah motor terasa kurang bertenaga atau putaran mesin naik tapi kecepatan tidak bertambah (kopling selip)?",
+    opts:[{t:"Ya, jelas terasa kopling selip saat akselerasi",cf:0.90},{t:"Kadang-kadang terasa",cf:0.55},{t:"Tidak, akselerasi normal",cf:0.05}] },
+  // REM
+  { cat:"Sistem Pengereman", g:"rem_blong", type:"choice",
+    text:"Apakah rem terasa kurang pakem, butuh jarak lebih panjang untuk berhenti, atau terdengar bunyi 'berdecit'?",
+    opts:[{t:"Ya, rem terasa blong / tidak pakem",cf:0.92},{t:"Sedikit kurang responsif dari biasanya",cf:0.55},{t:"Rem normal dan pakem",cf:0.05}] },
+  // SUSPENSI
+  { cat:"Suspensi & Kemudi", g:"suspensi_masalah", type:"scale", text:"Seberapa parah guncangan atau ayunan berlebih yang terasa pada suspensi (shockbreaker) motor?" },
+  // RIWAYAT
+  { cat:"Riwayat Perawatan", g:"lama_servis", type:"choice",
+    text:"Kapan terakhir motor mendapat servis rutin (ganti oli, bersihkan filter, cek busi)?",
+    opts:[{t:"Lebih dari 6 bulan atau >4000 km yang lalu",cf:0.90},{t:"Sekitar 3–6 bulan atau 2000–4000 km",cf:0.55},{t:"Kurang dari 3 bulan atau <2000 km",cf:0.10}] },
+];
+
+// ── 24 Aturan Produksi ──
+const RULES = [
+  // BUSI
+  { id:"R01", c:[{g:"susah_start",op:">=",v:0.8},{g:"mesin_mati_sendiri",op:">=",v:0.6}], conc:"BUS", cf:0.90, d:"Susah start + mati sendiri → Masalah Busi/Pengapian" },
+  { id:"R02", c:[{g:"susah_start",op:">=",v:0.7},{g:"lama_servis",op:">=",v:0.7}], conc:"BUS", cf:0.85, d:"Susah start + jarang servis → Busi aus" },
+  { id:"R03", c:[{g:"mesin_mati_sendiri",op:">=",v:0.7},{g:"suara_mesin",op:">=",v:0.5}], conc:"BUS", cf:0.78, d:"Mati sendiri + suara mesin → Pengapian bermasalah" },
+  // AKI
+  { id:"R04", c:[{g:"aki_drop",op:">=",v:0.8},{g:"lampu_bermasalah",op:">=",v:0.6}], conc:"AKI", cf:0.92, d:"Aki drop + lampu bermasalah → Aki/Kelistrikan" },
+  { id:"R05", c:[{g:"aki_drop",op:">=",v:0.8},{g:"susah_start",op:">=",v:0.6}], conc:"AKI", cf:0.88, d:"Aki drop + susah start → Aki lemah" },
+  { id:"R06", c:[{g:"lampu_bermasalah",op:">=",v:0.7},{g:"lama_servis",op:">=",v:0.6}], conc:"AKI", cf:0.75, d:"Lampu mati + jarang servis → Kelistrikan" },
+  // BBM
+  { id:"R07", c:[{g:"boros_bbm",op:">=",v:0.7},{g:"asap_knalpot",op:">=",v:0.6}], conc:"BBM", cf:0.90, d:"Boros BBM + asap hitam → Karburator/Injektor" },
+  { id:"R08", c:[{g:"boros_bbm",op:">=",v:0.7},{g:"lama_servis",op:">=",v:0.6}], conc:"BBM", cf:0.82, d:"Boros BBM + jarang servis → Filter/Karburator kotor" },
+  { id:"R09", c:[{g:"susah_start",op:">=",v:0.6},{g:"boros_bbm",op:">=",v:0.6}], conc:"BBM", cf:0.78, d:"Susah start + boros → Campuran bahan bakar" },
+  // OVERHEAT
+  { id:"R10", c:[{g:"suhu_mesin",op:">=",v:0.8},{g:"oli_kurang",op:">=",v:0.5}], conc:"OVH", cf:0.92, d:"Overheat + oli kurang → Mesin Overheat kritis" },
+  { id:"R11", c:[{g:"suhu_mesin",op:">=",v:0.8},{g:"lama_servis",op:">=",v:0.6}], conc:"OVH", cf:0.85, d:"Overheat + jarang servis → Overheating" },
+  { id:"R12", c:[{g:"suhu_mesin",op:">=",v:0.7},{g:"suara_mesin",op:">=",v:0.5}], conc:"OVH", cf:0.80, d:"Panas berlebih + suara mesin → Overheat" },
+  // OLI
+  { id:"R13", c:[{g:"oli_bocor",op:">=",v:0.8},{g:"oli_kurang",op:">=",v:0.6}], conc:"OLI", cf:0.92, d:"Bocor oli + level rendah → Pelumasan Kritis" },
+  { id:"R14", c:[{g:"oli_bocor",op:">=",v:0.7},{g:"lama_servis",op:">=",v:0.6}], conc:"OLI", cf:0.85, d:"Bocor oli + jarang servis → Seal/Gasket rusak" },
+  { id:"R15", c:[{g:"suara_mesin",op:">=",v:0.7},{g:"oli_kurang",op:">=",v:0.5}], conc:"OLI", cf:0.80, d:"Suara mesin + oli kurang → Pelumasan buruk" },
+  // RANTAI
+  { id:"R16", c:[{g:"rantai_aus",op:">=",v:0.8},{g:"lama_servis",op:">=",v:0.5}], conc:"RAN", cf:0.88, d:"Rantai aus + jarang servis → Rantai/Gir perlu ganti" },
+  { id:"R17", c:[{g:"rantai_aus",op:">=",v:0.7},{g:"kopling_slip",op:">=",v:0.4}], conc:"RAN", cf:0.80, d:"Rantai aus + kopling → Transmisi bermasalah" },
+  // KOPLING
+  { id:"R18", c:[{g:"kopling_slip",op:">=",v:0.8},{g:"lama_servis",op:">=",v:0.5}], conc:"KOP", cf:0.90, d:"Kopling selip + jarang servis → Kampas Kopling habis" },
+  { id:"R19", c:[{g:"kopling_slip",op:">=",v:0.7},{g:"boros_bbm",op:">=",v:0.5}], conc:"KOP", cf:0.82, d:"Kopling selip + boros → Kopling bermasalah" },
+  // REM
+  { id:"R20", c:[{g:"rem_blong",op:">=",v:0.8}], conc:"REM", cf:0.95, d:"Rem blong → Rem KRITIS perlu segera diperbaiki" },
+  { id:"R21", c:[{g:"rem_blong",op:">=",v:0.7},{g:"lama_servis",op:">=",v:0.5}], conc:"REM", cf:0.88, d:"Rem tidak pakem + jarang servis → Kampas rem habis" },
+  // SUSPENSI
+  { id:"R22", c:[{g:"suspensi_masalah",op:">=",v:0.7},{g:"lama_servis",op:">=",v:0.5}], conc:"SUS", cf:0.85, d:"Suspensi bermasalah + jarang servis → Shock bocor" },
+  { id:"R23", c:[{g:"suspensi_masalah",op:">=",v:0.8}], conc:"SUS", cf:0.80, d:"Suspensi parah → Shockbreaker perlu diganti" },
+  { id:"R24", c:[{g:"suspensi_masalah",op:">=",v:0.6},{g:"rantai_aus",op:">=",v:0.5}], conc:"SUS", cf:0.75, d:"Suspensi + rantai → Komponen bawah bermasalah" },
+];
+
+// Scale maps
+const SM_NORMAL = [{n:1,t:"Tidak Ada",cf:0.05},{n:2,t:"Ringan",cf:0.25},{n:3,t:"Sedang",cf:0.50},{n:4,t:"Banyak",cf:0.75},{n:5,t:"Sangat Banyak",cf:0.95}];
+const SM_SUARA  = [{n:1,t:"Tidak Ada",cf:0.05},{n:2,t:"Sedikit",cf:0.25},{n:3,t:"Sedang",cf:0.50},{n:4,t:"Keras",cf:0.75},{n:5,t:"Sangat Keras",cf:0.95}];
+const SM_OLI    = [{n:1,t:"Normal & Bersih",cf:0.05},{n:2,t:"Agak Hitam",cf:0.30},{n:3,t:"Hitam & Encer",cf:0.55},{n:4,t:"Hitam Pekat",cf:0.75},{n:5,t:"Hampir Habis",cf:0.95}];
+const SM_SUS    = [{n:1,t:"Tidak Ada",cf:0.05},{n:2,t:"Sedikit",cf:0.25},{n:3,t:"Cukup Parah",cf:0.50},{n:4,t:"Parah",cf:0.75},{n:5,t:"Sangat Parah",cf:0.95}];
+
+function getScaleMap(g){
+  if(g==='asap_knalpot') return SM_NORMAL;
+  if(g==='suara_mesin')  return SM_SUARA;
+  if(g==='oli_kurang')   return SM_OLI;
+  if(g==='suspensi_masalah') return SM_SUS;
+  return SM_NORMAL;
+}
+
+// ── STATE ──
+let cur=0, ans={}, selVal=null, iLog=[];
+
+// ── PROGRESS STEPS ──
+function renderSteps(){
+  const wrap=document.getElementById('prog-steps'); wrap.innerHTML='';
+  for(let i=0;i<QS.length;i++){
+    const d=document.createElement('div');
+    d.className='prog-step'+(i<cur?' done':i===cur?' active':'');
+    wrap.appendChild(d);
+  }
+}
+
+// ── INFERENCE ENGINE ──
+function runInference(){
+  iLog=[]; const scores={};
+  iLog.push("=== FORWARD CHAINING ENGINE — MOTOEXPERT ===");
+  iLog.push(`Gejala terdeteksi: ${Object.keys(ans).length} parameter`);
+  iLog.push("---");
+  RULES.forEach(r=>{
+    const ev=r.c.map(c=>{
+      const val=ans[c.g]||0; let ok=false;
+      if(c.op===">=")ok=val>=c.v;
+      else if(c.op==="<=")ok=val<=c.v;
+      return{g:c.g,val,v:c.v,op:c.op,ok};
+    });
+    const pass=ev.every(e=>e.ok);
+    if(pass){
+      const cfE=Math.min(...ev.map(e=>e.val));
+      const cfH=cfE*r.cf;
+      if(!scores[r.conc])scores[r.conc]=[];
+      scores[r.conc].push(cfH);
+      iLog.push(`[AKTIF] ${r.id}: ${r.d}`);
+      iLog.push(`  CF_E=min(${ev.map(e=>e.val.toFixed(2)).join(",")})=${cfE.toFixed(2)} | CF_H=${cfE.toFixed(2)}×${r.cf}=${cfH.toFixed(3)}`);
+    } else {
+      const fail=ev.filter(e=>!e.ok);
+      iLog.push(`[SKIP] ${r.id}: ${fail.map(f=>`${f.g}=${f.val.toFixed(2)}${f.op}${f.v}`).join(", ")}`);
+    }
+  });
+  iLog.push("--- KOMBINASI PARALEL ---");
+  const final={};
+  Object.entries(scores).forEach(([k,cfs])=>{
+    let c=cfs[0];
+    for(let i=1;i<cfs.length;i++) c=c+cfs[i]*(1-c);
+    final[k]=c;
+    iLog.push(`${k}: [${cfs.map(x=>x.toFixed(3)).join(",")}] → CF_final=${c.toFixed(4)}`);
+  });
+  const sorted=Object.entries(final).sort((a,b)=>b[1]-a[1]);
+  iLog.push("--- HASIL AKHIR ---");
+  sorted.forEach(([k,v])=>iLog.push(`${k}: ${(v*100).toFixed(1)}%`));
+  return sorted;
+}
+
+// ── UI ──
+function mulai(){
+  document.getElementById('sc-intro').style.display='none';
+  document.getElementById('sc-question').style.display='block';
+  renderSteps(); render();
+}
+
+function render(){
+  const q=QS[cur];
+  document.getElementById('q-tag').textContent=q.cat;
+  document.getElementById('q-num').textContent=`Q${String(cur+1).padStart(2,'0')} / ${QS.length}`;
+  document.getElementById('q-text').textContent=q.text;
+  document.getElementById('prog-txt').textContent=`${cur} / ${QS.length}`;
+  document.getElementById('prog-fill').style.width=`${cur/QS.length*100}%`;
+  renderSteps();
+  document.getElementById('btn-back').style.visibility=cur===0?'hidden':'visible';
+  const bn=document.getElementById('btn-next');
+  bn.classList.remove('on');
+  bn.textContent=cur===QS.length-1?'Lihat Hasil →':'Lanjut →';
+  selVal=null;
+
+  const card=document.getElementById('q-card');
+  card.style.animation='none'; void card.offsetWidth; card.style.animation='fadeUp .3s cubic-bezier(.4,0,.2,1)';
+  const wrap=document.getElementById('q-opts'); wrap.innerHTML='';
+
+  if(q.type==='scale'){
+    const sc=getScaleMap(q.g);
+    const row=document.createElement('div'); row.className='scale-wrap';
+    sc.forEach(s=>{
+      const b=document.createElement('button'); b.className='scale-btn';
+      const prev=ans[q.g];
+      if(prev!==undefined&&Math.abs(prev-s.cf)<0.01){b.classList.add('sel');selVal=s.cf;bn.classList.add('on');}
+      b.innerHTML=`<div class="scale-n">${s.n}</div><div class="scale-t">${s.t}</div>`;
+      b.onclick=()=>{row.querySelectorAll('.scale-btn').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');selVal=s.cf;document.getElementById('btn-next').classList.add('on');};
+      row.appendChild(b);
+    });
+    wrap.appendChild(row);
+  } else {
+    const col=document.createElement('div'); col.className='opts';
+    q.opts.forEach(o=>{
+      const b=document.createElement('button'); b.className='opt';
+      const prev=ans[q.g];
+      if(prev!==undefined&&Math.abs(prev-o.cf)<0.01){b.classList.add('sel');selVal=o.cf;bn.classList.add('on');}
+      b.innerHTML=`<div class="opt-radio"></div><div class="opt-label">${o.t}</div><div class="opt-cf">CF=${o.cf}</div>`;
+      b.onclick=()=>{col.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');selVal=o.cf;document.getElementById('btn-next').classList.add('on');};
+      col.appendChild(b);
+    });
+    wrap.appendChild(col);
+  }
+}
+
+function next(){
+  if(selVal===null)return;
+  ans[QS[cur].g]=selVal;
+  if(cur<QS.length-1){cur++;render();}
+  else showResult();
+}
+function prev(){if(cur>0){cur--;render();}}
+
+function cfLabel(cf){
+  if(cf>=0.80)return{txt:"Sangat Tinggi — Perlu Tindakan Segera",color:"#dc2626",barColor:"#ef4444"};
+  if(cf>=0.60)return{txt:"Tinggi — Perlu Perhatian Serius",color:"#d97706",barColor:"#f59e0b"};
+  if(cf>=0.40)return{txt:"Sedang — Sebaiknya Segera Diperbaiki",color:"#2563eb",barColor:"#3b82f6"};
+  return{txt:"Rendah — Pantau Perkembangan",color:"#64748b",barColor:"#94a3b8"};
+}
+
+function showResult(){
+  document.getElementById('sc-question').style.display='none';
+  const rd=document.getElementById('sc-result'); rd.style.display='block';
+  const sorted=runInference();
+
+  if(sorted.length===0){
+    rd.innerHTML=`<div class="res-card" style="padding:48px;text-align:center">
+      <div style="font-size:60px;margin-bottom:16px">✅</div>
+      <h2 style="font-size:22px;font-weight:800;color:var(--navy);margin-bottom:12px;">Motor Tampak Sehat!</h2>
+      <p style="color:var(--slate2);font-size:14px;line-height:1.7;max-width:400px;margin:0 auto 28px;">Tidak ada kerusakan signifikan yang terdeteksi berdasarkan gejala yang Anda laporkan. Lanjutkan servis rutin sesuai jadwal.</p>
+      <button class="btn-reset" onclick="ulang()" style="max-width:300px;margin:0 auto;">🔄 Diagnosa Ulang</button></div>`;
+    return;
+  }
+
+  const [topKey,topCF]=sorted[0];
+  const top=KERUSAKAN[topKey];
+  const lbl=cfLabel(topCF);
+  const badgeCls=top.level==='KRITIS'?'rb-kritis':top.level==='SEDANG'?'rb-sedang':'rb-ringan';
+
+  const rankList=sorted.slice(0,5).map(([k,cf],i)=>{
+    const j=KERUSAKAN[k]; if(!j)return'';
+    const rc=['dr1','dr2','dr3','drn','drn'][i]||'drn';
+    const pct=(cf*100).toFixed(0);
+    const barColor=i===0?'var(--red)':i===1?'var(--amber)':'var(--slate3)';
+    return `<div class="diag-item${i===0?' top':''}">
+      <div class="diag-rank ${rc}">${i+1}</div>
+      <div class="diag-icon">${j.icon}</div>
+      <div class="diag-info">
+        <div class="diag-name">${j.nama}</div>
+        <div class="diag-sub">${j.cat} · ${j.jadwal}</div>
+      </div>
+      <div class="diag-bar-wrap">
+        <div class="diag-bar-track"><div class="diag-bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
+        <div class="diag-pct" style="color:${barColor}">${pct}%</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const aksiHTML=top.aksi.map((a,i)=>`
+    <div class="action-item">
+      <div class="action-num">${i+1}</div>
+      <span>${a}</span>
+    </div>`).join('');
+
+  const partsHTML=top.parts.map(p=>`<div class="part-chip"><span>${p.split(' ')[0]}</span>${p.split(' ').slice(1).join(' ')}</div>`).join('');
+
+  const jadwalSi=top.level==='KRITIS'?'si-red':top.level==='SEDANG'?'si-amber':'si-green';
+
+  const logHTML=iLog.map(l=>{
+    if(l.startsWith('[AKTIF]'))return`<div><span class="lg-ok">${l}</span></div>`;
+    if(l.startsWith('[SKIP]'))return`<div><span class="lg-skip">${l}</span></div>`;
+    if(l.startsWith('===')||l.startsWith('---'))return`<div><span class="lg-head">${l}</span></div>`;
+    if(l.includes('CF_final')||l.includes('CF_H'))return`<div><span class="lg-cf">${l}</span></div>`;
+    return`<div>${l}</div>`;
+  }).join('');
+
+  rd.innerHTML=`
+  <div class="res-card">
+    <div class="res-head">
+      <div class="res-badge ${badgeCls}">● LEVEL: ${top.level}</div>
+      <h2>${top.icon} ${top.nama}</h2>
+      <div class="res-meta">
+        <span>📂 ${top.cat}</span>
+        <span>⏱ Tindakan: ${top.jadwal}</span>
+      </div>
+    </div>
+    <div class="res-body">
+      <div class="cf-meter">
+        <div class="cf-top">
+          <span class="cf-label">Tingkat Kepastian Diagnosa</span>
+          <span class="cf-pct" id="cf-pct">0%</span>
+        </div>
+        <div class="cf-track"><div class="cf-bar" id="cf-bar" style="width:0%;background:${lbl.barColor}"></div></div>
+        <div class="cf-desc" style="color:${lbl.color}">${lbl.txt}</div>
+        <div class="cf-sublabel">Dihitung menggunakan metode Certainty Factor dengan kombinasi paralel</div>
+      </div>
+
+      <div class="sec">Peringkat Diagnosa — Top 5</div>
+      <div class="diag-list">${rankList}</div>
+
+      <div class="sec">Komponen yang Perlu Diperiksa / Diganti</div>
+      <div class="parts-box">
+        <div style="font-size:13px;font-weight:600;color:var(--slate);margin-bottom:6px;">Estimasi kebutuhan suku cadang:</div>
+        <div class="parts-grid">${partsHTML}</div>
+      </div>
+
+      <div class="sec">Langkah Perbaikan — ${top.nama}</div>
+      <div class="action-box">
+        <div class="action-box-head">
+          <span style="font-size:16px">🔧</span>
+          <h4>Prosedur Perbaikan & Perawatan</h4>
+        </div>
+        ${aksiHTML}
+      </div>
+
+      <div class="sec">Jadwal Servis</div>
+      <div class="sched-grid">
+        <div class="sched-item ${jadwalSi}">
+          <div class="sched-item-label">Tindakan Utama</div>
+          <div class="sched-item-val">${top.jadwal}</div>
+        </div>
+        <div class="sched-item si-green">
+          <div class="sched-item-label">Ganti Oli</div>
+          <div class="sched-item-val">Tiap 2000–4000 km</div>
+        </div>
+        <div class="sched-item si-amber">
+          <div class="sched-item-label">Servis Rutin</div>
+          <div class="sched-item-val">Tiap 3 bulan / 3000 km</div>
+        </div>
+        <div class="sched-item si-blue">
+          <div class="sched-item-label">Cek Harian</div>
+          <div class="sched-item-val">Rem, ban, lampu, oli</div>
+        </div>
+      </div>
+
+      <div class="log-wrap">
+        <div class="log-head" onclick="toggleLog()">
+          <div class="log-head-left">
+            <div class="log-head-dot"></div>
+            <div class="log-head-title">LOG INFERENSI — FORWARD CHAINING ENGINE</div>
+          </div>
+          <div class="log-tog" id="log-tog">▼ TAMPILKAN</div>
+        </div>
+        <div class="log-body" id="log-body">${logHTML}</div>
+      </div>
+
+      <button class="btn-reset" onclick="ulang()">🔄 Diagnosa Motor Ulang</button>
+    </div>
+  </div>`;
+
+  setTimeout(()=>{
+    const pct=(topCF*100).toFixed(1);
+    document.getElementById('cf-bar').style.width=pct+'%';
+    document.getElementById('cf-pct').textContent=pct+'%';
+  },300);
+}
+
+function toggleLog(){
+  const b=document.getElementById('log-body'); b.classList.toggle('open');
+  document.getElementById('log-tog').textContent=b.classList.contains('open')?'▲ SEMBUNYIKAN':'▼ TAMPILKAN';
+}
+
+function ulang(){
+  cur=0;ans={};selVal=null;iLog=[];
+  document.getElementById('sc-result').style.display='none';
+  document.getElementById('sc-intro').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
